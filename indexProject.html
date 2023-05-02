@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- **************************************************************************************** -->
+    <!-- *                                                                                      * -->
+    <!-- * Do not change anything within the <head></head> section of the HTML                  * -->
+    <!-- *                                                                                      * -->
+    <!-- **************************************************************************************** -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <style> .btn{border:1px solid black; padding:5px;display:inline-block} </style>
+</head>
+<body>
+    <!-- **************************************************************************************** -->
+    <!-- *                                                                                      * -->
+    <!-- * Nothing to change here in the <body> ... unless you want to :-)                      * -->
+    <!-- *                                                                                      * -->
+    <!-- **************************************************************************************** -->
+
+    <div class="container">
+        <h1>Parks Special Events </h1>
+        <p> Press this button to reveal a pie chart highlighting special events facilitated by NYC Parks
+            by borough. </p>
+        <form><input type="button" class="btn btn-primary" id="btn_1" value=" Pie Chart"></form>
+        
+        <div id="textDisplayed1"></div>
+    </div>
+</body>
+<script>
+function displayRegionsPieChart() {
+    // Step 1: Get data from API
+    $.getJSON("https://data.cityofnewyork.us/resource/6v4b-5gp4.json?$limit=10000", function(ratings){
+        console.log(ratings);
+        
+        // Step 2: Process your data, perform calculation
+        let boroughNames = [];
+        let boroughNumbers = []
+
+        for(let i=0; i < ratings.length;i++){
+            let borough = ratings[i]['borough']
+        
+        if (boroughNames.indexOf(borough)==-1){
+            boroughNames[boroughNames.length] = borough;
+            boroughNumbers[boroughNumbers.length] = 0;
+            }
+            boroughNumbers[boroughNames.indexOf(borough)] += 1;
+    }
+
+    console.log(boroughNames);
+    console.log(boroughNumbers);
+
+    let percentBor=[];
+        for(let i=0;i<5;i++){
+            percentBor[percentBor.length]=((boroughNumbers[i]/ratings.length)*100).toFixed(2)
+        }
+        console.log(percentBor)
+
+        // Step 3: Prepare data for Image-Charts API 
+        let imageChartData = '';
+        let imageChartLabels = '';
+        for (let i =0; i<boroughNames.length; i++){
+            imageChartLabels += boroughNames[i] + " " +percentBor[i] + "%";
+            imageChartData+=  percentBor[i];
+            if (i<boroughNames.length-1){
+                imageChartLabels+='|';
+                imageChartData+=','
+            }
+        }
+
+        console.log(imageChartData);
+        console.log(imageChartLabels);
+     // Step 4: Get image from Image-Charts API 
+            let imageHTMLcode = '<img src="https://image-charts.com/chart?cht=p3&chs=500x500&chd=t:'+imageChartData+'&chl='+imageChartLabels+'" alt="Static Chart"/>';
+        console.log(imageHTMLcode);
+        $('#textDisplayed1').html(imageHTMLcode);
+    });
+}
+
+
+    $('#btn_1').click(function(){
+    displayRegionsPieChart();
+})
+
+</script>
+</html>
